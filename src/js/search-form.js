@@ -8,6 +8,7 @@ const refs = {
   inputEl: document.querySelector('#search-form > input'),
   buttonEl: document.querySelector('#search-form > button'),
   galleryContainer: document.querySelector('.gallery'),
+  observerEl: document.querySelector('.sentinel'),
 };
 
 console.dir(refs.formEl);
@@ -15,16 +16,11 @@ console.dir(refs.inputEl);
 console.dir(refs.buttonEl);
 console.dir(refs.galleryContainer);
 
-// refs.inputEl.addEventListener('input', onInputValue);
 refs.formEl.addEventListener('submit', onFormSubmit);
-
-// function onInputValue() {
-//   console.log(refs.inputEl.value);
-// }
+refs.galleryContainer.addEventListener('click', onGalleryContainerClick);
 
 function onFormSubmit(event) {
   event.preventDefault();
-  console.log('submit');
   searchPicturers();
 }
 
@@ -52,10 +48,6 @@ function onFetchError() {
   };
 }
 
-// function successSearchMessage() {
-//   return Notify.success('Hooray! We found ${totalHits} images.');
-// }
-
 // markup functions
 function appendImagesMarkup(image) {
   refs.galleryContainer.insertAdjacentHTML(
@@ -79,6 +71,7 @@ function createImagesMarkup(image) {
       }) => {
         return `<a
         class="gallery__item"
+        target="_self"
         rel="nofollow, noreferrer"
         title="Click to enlarge"
         loading="lazy"
@@ -86,9 +79,9 @@ function createImagesMarkup(image) {
           <img class="gallery__image" src="${webformatURL}" alt="${tags}"/>
           <div class="gallery__descr">
             <p class="gallery__features">likes:<span class="gallery__values"> ${likes}</span></p>
-            <p class="gallery__features">views:<span class="gallery__values> ${views}</span></p>
-            <p class="gallery__features">comments:<span class="gallery__values> ${comments}</span></p>
-            <p class="gallery__features">downloads:<span class="gallery__values> ${downloads}</span></p>
+            <p class="gallery__features">views:<span class="gallery__values"> ${views}</span></p>
+            <p class="gallery__features">comments:<span class="gallery__values"> ${comments}</span></p>
+            <p class="gallery__features">downloads:<span class="gallery__values"> ${downloads}</span></p>
           </div>
         </a>`;
       }
@@ -100,10 +93,34 @@ function clearMurkup() {
   refs.galleryContainer.innerHTML = '';
 }
 
-// lightbox
+// click event function
+function onGalleryContainerClick(event) {
+  console.log('click');
+  event.preventDefault();
+}
+
+// simpleLightbox
 var lightbox = new SimpleLightbox('.gallery a', {
   //   options
   captionDelay: 250,
   captionSelector: 'img',
   captionsData: 'alt',
 });
+
+lightbox.refresh();
+
+const onEntry = entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && searchQuery !== '') {
+      API.fetchPictures().then(images => {
+        appendImagesMarkup(images);
+      });
+    }
+  });
+};
+
+const observer = new IntersectionObserver(onEntry, {
+  rootMargin: '150px',
+});
+
+observer.observe(refs.observerEl);

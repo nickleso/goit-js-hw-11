@@ -10,17 +10,35 @@ function fetchPictures(name) {
   return fetch(url)
     .then(response => {
       if (!response.ok) {
-        Notify.failure('Oops, there is no country with that name!', {
-          position: 'right-top',
-          fontSize: '14px',
-        });
+        Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.',
+          {
+            position: 'right-top',
+            fontSize: '12px',
+          }
+        );
       }
 
       return response.json();
     })
     .then(data => {
-      console.log(data.hits.length);
-      return data.hits;
+      if (data.hits.length === 0) {
+        Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.',
+          {
+            position: 'right-top',
+            fontSize: '12px',
+          }
+        );
+      } else {
+        const totalResults = data.totalHits;
+        Notify.success(`Hooray! We found ${totalResults} images.`, {
+          position: 'right-top',
+          fontSize: '14px',
+        });
+
+        return data.hits;
+      }
     });
 }
 

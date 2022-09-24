@@ -6,7 +6,6 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 const refs = {
   formEl: document.querySelector('#search-form'),
   inputEl: document.querySelector('#search-form > input'),
-  buttonEl: document.querySelector('#search-form > button'),
   galleryContainer: document.querySelector('.gallery'),
   observerEl: document.querySelector('.sentinel'),
 };
@@ -27,7 +26,6 @@ function searchPicturers() {
     return;
   }
   picturesSerchAPI.query = refs.inputEl.value.trim();
-  console.log(picturesSerchAPI.query);
 
   observer.observe(refs.observerEl);
 
@@ -83,7 +81,6 @@ function appendImagesMarkup(data) {
 }
 
 function createImagesMarkup(image) {
-  // console.log(image);
   return image
     .map(
       ({
@@ -121,7 +118,6 @@ function clearMurkup() {
 
 // click event function
 function onGalleryContainerClick(event) {
-  console.log('click');
   event.preventDefault();
 }
 

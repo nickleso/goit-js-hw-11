@@ -1,4 +1,4 @@
-import API from './fetch-pics.js';
+import PicturesAPI from './fetch-pics.js';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
@@ -11,11 +11,6 @@ const refs = {
   observerEl: document.querySelector('.sentinel'),
 };
 
-console.dir(refs.formEl);
-console.dir(refs.inputEl);
-console.dir(refs.buttonEl);
-console.dir(refs.galleryContainer);
-
 refs.formEl.addEventListener('submit', onFormSubmit);
 refs.galleryContainer.addEventListener('click', onGalleryContainerClick);
 
@@ -24,15 +19,28 @@ function onFormSubmit(event) {
   searchPicturers();
 }
 
+const picturesSerchAPI = new PicturesAPI();
+
 // search function
 function searchPicturers() {
+  picturesSerchAPI.query = refs.inputEl.value.trim();
+  console.log(picturesSerchAPI.query);
+
+  picturesSerchAPI.resetPage();
   clearMurkup();
 
-  const searchQuery = refs.inputEl.value.trim();
-  console.log(searchQuery);
-
-  if (searchQuery) {
-    API.fetchPictures(searchQuery).then(appendImagesMarkup).catch(onFetchError);
+  if (picturesSerchAPI.query) {
+    picturesSerchAPI
+      .fetchPictures(picturesSerchAPI.query)
+      // .then(data => {
+      //   const totalResults = data.hits;
+      //   Notify.success(`Hooray! We found ${totalResults} images.`, {
+      //     position: 'right-top',
+      //     fontSize: '14px',
+      //   });
+      // })
+      .then(appendImagesMarkup)
+      .catch(onFetchError);
   } else {
     Notify.info('Type something.', {
       position: 'right-top',
@@ -54,6 +62,7 @@ function appendImagesMarkup(image) {
     'beforeend',
     createImagesMarkup(image)
   );
+  lightbox.refresh();
 }
 
 function createImagesMarkup(image) {
@@ -107,13 +116,15 @@ var lightbox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
 });
 
-lightbox.refresh();
-
+// intersection observer
 const onEntry = entries => {
   entries.forEach(entry => {
-    if (entry.isIntersecting && searchQuery !== '') {
-      API.fetchPictures().then(images => {
+    if (entry.isIntersecting && picturesSerchAPI.query !== '') {
+      picturesSerchAPI.icrementPage();
+
+      picturesSerchAPI.fetchPictures().then(images => {
         appendImagesMarkup(images);
+        lightbox.refresh();
       });
     }
   });

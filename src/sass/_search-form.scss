@@ -10,15 +10,17 @@ body {
 
 // search form
 .wrapper {
+  z-index: 100;
   display: flex;
   justify-content: center;
 
   padding-top: 22px;
   padding-bottom: 22px;
 
-  background-color: #ff6c0a94;
+  background-color: #f7914e;
 
-  // position: fixed;
+  // background-color: #ff6c0a94;
+  position: fixed;
   width: 100%;
 }
 
@@ -53,7 +55,7 @@ body {
 
 // gallery
 .gallery {
-  padding-top: 30px;
+  padding-top: 106px;
   // display: flex;
   // flex-wrap: wrap;
   // gap: 20px;

@@ -23,8 +23,13 @@ const picturesSerchAPI = new PicturesAPI();
 
 // search function
 function searchPicturers() {
+  if (!refs.inputEl.value.trim()) {
+    return;
+  }
   picturesSerchAPI.query = refs.inputEl.value.trim();
   console.log(picturesSerchAPI.query);
+
+  observer.observe(refs.observerEl);
 
   picturesSerchAPI.resetPage();
   clearMurkup();
@@ -32,35 +37,47 @@ function searchPicturers() {
   if (picturesSerchAPI.query) {
     picturesSerchAPI
       .fetchPictures(picturesSerchAPI.query)
-      // .then(data => {
-      //   const totalResults = data.hits;
-      //   Notify.success(`Hooray! We found ${totalResults} images.`, {
-      //     position: 'right-top',
-      //     fontSize: '14px',
-      //   });
-      // })
-      .then(appendImagesMarkup)
+      .then(data => {
+        if (!data.hits.length) {
+          Notify.failure(
+            'Sorry, there are no images matching your search query. Please try again.',
+            {
+              position: 'right-top',
+              fontSize: '12px',
+            }
+          );
+          return;
+        }
+
+        appendImagesMarkup(data);
+        const totalResults = data.totalHits;
+        Notify.success(`Hooray! We found ${totalResults} images.`, {
+          position: 'right-top',
+          fontSize: '14px',
+        });
+      })
+
       .catch(onFetchError);
-  } else {
-    Notify.info('Type something.', {
-      position: 'right-top',
-      fontSize: '14px',
-    });
   }
 }
 
 function onFetchError() {
   error => {
-    console.log(error);
-    throw new Error(response.status);
+    Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.',
+      {
+        position: 'right-top',
+        fontSize: '12px',
+      }
+    );
   };
 }
 
 // markup functions
-function appendImagesMarkup(image) {
+function appendImagesMarkup(data) {
   refs.galleryContainer.insertAdjacentHTML(
     'beforeend',
-    createImagesMarkup(image)
+    createImagesMarkup(data.hits)
   );
   lightbox.refresh();
 }
@@ -119,7 +136,7 @@ var lightbox = new SimpleLightbox('.gallery a', {
 // intersection observer
 const onEntry = entries => {
   entries.forEach(entry => {
-    if (entry.isIntersecting && picturesSerchAPI.query !== '') {
+    if (entry.isIntersecting && entry.boundingClientRect.bottom > 300) {
       picturesSerchAPI.icrementPage();
 
       picturesSerchAPI.fetchPictures().then(images => {
@@ -133,5 +150,3 @@ const onEntry = entries => {
 const observer = new IntersectionObserver(onEntry, {
   rootMargin: '150px',
 });
-
-observer.observe(refs.observerEl);

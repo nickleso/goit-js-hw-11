@@ -10,43 +10,12 @@ export default class PicturesAPI {
     this.page = 1;
   }
 
-  fetchPictures() {
+  async fetchPictures() {
     const url = `${BASE_URL}?key=${KEY}&q=${this.searchQuery}&page=${this.page}&per_page=40&image_type=photo&orientation=horizontal&safesearch=true`;
     console.log(url);
-
-    return fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          Notify.failure(
-            'Sorry, there are no images matching your search query. Please try again.',
-            {
-              position: 'right-top',
-              fontSize: '12px',
-            }
-          );
-        }
-
-        return response.json();
-      })
-      .then(data => {
-        if (!data.hits.length) {
-          Notify.failure(
-            'Sorry, there are no images matching your search query. Please try again.',
-            {
-              position: 'right-top',
-              fontSize: '12px',
-            }
-          );
-        } else {
-          const totalResults = data.totalHits;
-          Notify.success(`Hooray! We found ${totalResults} images.`, {
-            position: 'right-top',
-            fontSize: '14px',
-          });
-
-          return data.hits;
-        }
-      });
+    const { data } = await axios.get(url);
+    console.log('axios', data);
+    return data;
   }
 
   // fetchPictures() {
